@@ -18,7 +18,16 @@ async function importNamespaces(lang, namespaces = []) {
 
 export async function getI18nProps(ctx, namespaces) {
   const lang = ctx.params?.lang || defaultLanguage
-
+  if (!allLanguages.includes(lang)) {
+    if (ctx.res) {
+      console.log(ctx.req.url);
+      ctx.res.writeHead(302, { Location: ctx.req.url.replace(new RegExp(`^\/${lang}`), `/${defaultLanguage}`) });
+      ctx.res.end();
+      return;
+    } else {
+      throw new Error(`Locale ${lang} is not supported`);
+    }
+  }
   return {
     lang,
     namespaces: await importNamespaces(lang, namespaces),
